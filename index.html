@@ -1,593 +1,561 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生卡密领取系统</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Microsoft YaHei', sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 900px;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-        }
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            font-size: 16px;
-            opacity: 0.8;
-        }
-        .content {
-            padding: 30px;
-        }
-        .tabs {
-            display: flex;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #eee;
-        }
-        .tab {
-            padding: 12px 25px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #7f8c8d;
-            transition: all 0.3s;
-        }
-        .tab.active {
-            color: #3498db;
-            border-bottom: 3px solid #3498db;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-        input:focus {
-            border-color: #3498db;
-            outline: none;
-        }
-        .btn {
-            padding: 14px 25px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s;
-            display: inline-block;
-            text-align: center;
-        }
-        .btn:hover {
-            background: #2980b9;
-        }
-        .btn-full {
-            width: 100%;
-        }
-        .card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            margin-top: 20px;
-            text-align: center;
-            border-left: 5px solid #2ecc71;
-        }
-        .card-title {
-            font-size: 18px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
-        }
-        .card-code {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-            letter-spacing: 2px;
-            font-family: monospace;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 5px solid #c62828;
-        }
-        .success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left: 5px solid #2e7d32;
-        }
-        .info {
-            background: #e3f2fd;
-            color: #1565c0;
-            border-left: 5px solid #1565c0;
-        }
-        .admin-panel {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 30px;
-        }
-        .admin-title {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            font-size: 22px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .status {
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: inline-block;
-            font-size: 0.8em;
-        }
-        .status-unused {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        .status-used {
-            background: #ffebee;
-            color: #c62828;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .btn-secondary {
-            background: #7f8c8d;
-        }
-        .btn-secondary:hover {
-            background: #636e72;
-        }
-        .btn-success {
-            background: #2ecc71;
-        }
-        .btn-success:hover {
-            background: #27ae60;
-        }
-        .file-upload {
-            display: none;
-        }
-        .file-upload-label {
-            display: inline-block;
-            padding: 14px 25px;
-            background: #9b59b6;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s;
-            text-align: center;
-        }
-        .file-upload-label:hover {
-            background: #8e44ad;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #7f8c8d;
-            font-size: 0.9em;
-            padding: 20px;
-            border-top: 1px solid #eee;
-        }
-        .instructions {
-            background: #fff8e1;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 5px solid #ffc107;
-        }
-        .instructions h3 {
-            color: #ff9800;
-            margin-bottom: 10px;
-        }
-        .instructions ol {
-            padding-left: 20px;
-        }
-        .instructions li {
-            margin-bottom: 8px;
-        }
-        @media (max-width: 768px) {
-            .tabs {
-                flex-direction: column;
-            }
-            .action-buttons {
-                flex-direction: column;
-            }
-            .btn, .file-upload-label {
-                width: 100%;
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>卡密领取页面（静态）</title>
+  <style>
+    body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f7fafc; color:#222; padding:24px}
+    .card{background:#fff; border-radius:10px; box-shadow:0 6px 18px rgba(20,20,30,0.06); padding:18px; max-width:820px; margin:auto}
+    h1{margin:0 0 12px 0;font-size:20px}
+    form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    input{padding:8px 10px;border:1px solid #ddd;border-radius:6px;min-width:180px}
+    button{padding:9px 12px;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer}
+    button:disabled{opacity:0.6;cursor:not-allowed}
+    .msg{padding:10px;border-radius:6px;margin-top:10px}
+    .msg.success{background:#ecfdf5;border:1px solid #bbf7d0;color:#065f46}
+    .msg.error{background:#fff1f2;border:1px solid #fbc4cc;color:#9f1239}
+    table{width:100%;border-collapse:collapse;margin-top:16px}
+    th,td{padding:8px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+    th{background:#f8fafc}
+    .small{font-size:13px;color:#475569}
+    .claim-status{font-weight:600}
+    .masked{letter-spacing:2px}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>学生卡密领取系统</h1>
-            <div class="subtitle">请输入学号和姓名验证身份后获取卡密</div>
-        </div>
-        
-        <div class="content">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('student')">学生领取</div>
-                <div class="tab" onclick="switchTab('admin')">管理面板</div>
-            </div>
-            
-            <div id="message" class="message info">
-                请先导入卡密数据文件(card.csv)，然后输入学号和姓名获取卡密
-            </div>
-            
-            <div id="studentTab" class="tab-content active">
-                <div class="form-group">
-                    <label for="studentId">学号</label>
-                    <input type="text" id="studentId" placeholder="请输入您的学号">
-                </div>
-                
-                <div class="form-group">
-                    <label for="studentName">姓名</label>
-                    <input type="text" id="studentName" placeholder="请输入您的姓名">
-                </div>
-                
-                <button class="btn btn-full" onclick="verifyStudent()">验证身份</button>
-                
-                <div id="cardResult" class="card" style="display: none;">
-                    <div class="card-title">您的卡密</div>
-                    <div id="cardCode" class="card-code"></div>
-                    <p>请妥善保管此卡密，勿泄露给他人</p>
-                </div>
-            </div>
-            
-            <div id="adminTab" class="tab-content">
-                <div class="admin-panel">
-                    <div class="admin-title">卡密管理</div>
-                    
-                    <div class="instructions">
-                        <h3>使用说明</h3>
-                        <ol>
-                            <li>准备CSV文件，格式为：学号,姓名,卡密 (例如: 2024001,张三,ABCD-EFGH-IJKL-MNOP)</li>
-                            <li>点击"选择CSV文件"按钮上传文件</li>
-                            <li>上传成功后数据将自动加载</li>
-                            <li>学生可以在"学生领取"标签页中输入学号和姓名获取卡密</li>
-                        </ol>
-                    </div>
-                    
-                    <input type="file" id="fileUpload" class="file-upload" accept=".csv">
-                    <label for="fileUpload" class="file-upload-label">选择CSV文件</label>
-                    
-                    <div class="action-buttons">
-                        <button class="btn btn-success" onclick="exportCards()">导出数据</button>
-                        <button class="btn btn-secondary" onclick="clearAllData()">清除所有数据</button>
-                    </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>序号</th>
-                                <th>学号</th>
-                                <th>姓名</th>
-                                <th>卡密</th>
-                                <th>状态</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cardTable">
-                            <!-- 卡密数据将在这里动态生成 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>© 2023 卡密发放系统 | 共 <span id="totalCount">0</span> 个卡密 | 未使用: <span id="unusedCount">0</span> | 已使用: <span id="usedCount">0</span></p>
-        </div>
-    </div>
+  <div class="card">
+    <h1>卡密领取（静态页）</h1>
+    <p class="small">请在下面输入学号与姓名，若匹配成功且尚未领取，系统会显示并保存该卡密（保存在浏览器本地）。此页面为静态客户端实现，数据不安全，仅供小范围使用或演示。</p>
 
-    <script>
-        // 初始化卡密数据
-        let cardData = JSON.parse(localStorage.getItem('cardData')) || [];
-        
-        // 页面加载时更新表格和统计信息
-        document.addEventListener('DOMContentLoaded', function() {
-            updateAdminTable();
-            updateStats();
-            
-            // 文件上传事件
-            document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
-        });
-        
-        // 切换标签页
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            if (tabName === 'student') {
-                document.querySelector('.tab:first-child').classList.add('active');
-                document.getElementById('studentTab').classList.add('active');
-            } else {
-                document.querySelector('.tab:last-child').classList.add('active');
-                document.getElementById('adminTab').classList.add('active');
-            }
+    <form id="claimForm" onsubmit="return false;">
+      <input id="stuId" placeholder="学号" required />
+      <input id="stuName" placeholder="姓名" required />
+      <button id="claimBtn">领取卡密</button>
+      <button id="resetBtn" type="button">重置已领取状态</button>
+    </form>
+
+    <div id="messageArea"></div>
+
+    <div class="small" id="stats"></div>
+
+    <table aria-describedby="数据表">
+      <thead>
+        <tr><th>学号</th><th>姓名</th><th>卡密</th><th>状态</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // ====== 静态表格数据（在此修改/扩展） ======
+    const staticData = [
+      [
+  {
+    "id": "2024040634",
+    "name": "王伟",
+    "card": "60881497771323821354",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070410",
+    "name": "郝梓彤",
+    "card": "56204626981926708414",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070801",
+    "name": "曹旭东",
+    "card": "02591491382049021792",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070802",
+    "name": "陈星宇",
+    "card": "25353259905010044946",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070803",
+    "name": "陈艺文",
+    "card": "38640021320457129369",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070804",
+    "name": "邓雯",
+    "card": "61302120923253030528",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070805",
+    "name": "杜仕朝",
+    "card": "46591127810451344953",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070806",
+    "name": "段慧艳",
+    "card": "14172461401549239148",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070807",
+    "name": "郭东旭",
+    "card": "57014074566152308951",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070808",
+    "name": "郭淮瑾",
+    "card": "25033386843930246997",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070809",
+    "name": "郭伟淇",
+    "card": "59336074162143565397",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070810",
+    "name": "杭梦婷",
+    "card": "04808479053805709739",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070811",
+    "name": "胡思琦",
+    "card": "13498372880026203249",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070812",
+    "name": "胡栩悦",
+    "card": "07505379050795341881",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070813",
+    "name": "黄俊奇",
+    "card": "31758365560954605108",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070814",
+    "name": "黄心艺",
+    "card": "61144287503434562786",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070815",
+    "name": "黄桢茹",
+    "card": "33671015510473600345",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070816",
+    "name": "姬生伟",
+    "card": "42205494962516817496",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070817",
+    "name": "姜梓淳",
+    "card": "12116171071441963292",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070819",
+    "name": "李洪超",
+    "card": "40106193595839126871",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070820",
+    "name": "李俊锦",
+    "card": "34500031695135944545",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070821",
+    "name": "李宇宏",
+    "card": "38071465875075448482",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070822",
+    "name": "廖凤怡",
+    "card": "22583146992518413168",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070823",
+    "name": "刘敏",
+    "card": "24253104803758360108",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070824",
+    "name": "罗静",
+    "card": "21565451954834565226",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070825",
+    "name": "骆恩金",
+    "card": "60999604472136910801",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070826",
+    "name": "毛鑫睿",
+    "card": "22470186531820959218",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070827",
+    "name": "明余",
+    "card": "62477087811272243653",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070828",
+    "name": "欧祥林",
+    "card": "29768444354591139892",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070829",
+    "name": "彭诗茜",
+    "card": "38041644003764135156",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070830",
+    "name": "阮翔",
+    "card": "07762011173337404475",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070831",
+    "name": "斯泾琳",
+    "card": "20321166993722648217",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070832",
+    "name": "汤雨菲",
+    "card": "22742300531278412321",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070833",
+    "name": "唐金",
+    "card": "03563639500005741027",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070834",
+    "name": "唐雪",
+    "card": "56679455494882501293",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070835",
+    "name": "土比子聪",
+    "card": "31588309153816811368",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070836",
+    "name": "王泓又",
+    "card": "64510037685002146788",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070837",
+    "name": "王稷",
+    "card": "11055195223059100162",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070838",
+    "name": "王佳帅",
+    "card": "52862304374439900373",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070839",
+    "name": "王青松",
+    "card": "41170154611082739813",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070840",
+    "name": "王一帆",
+    "card": "24418142423458744585",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070841",
+    "name": "吴雨桐",
+    "card": "25284576391524007480",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070842",
+    "name": "伍文佳",
+    "card": "44790384816334837489",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070843",
+    "name": "谢爱源",
+    "card": "24391201723638334480",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070844",
+    "name": "辛书睿",
+    "card": "18060306223301632736",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070845",
+    "name": "许祯毅",
+    "card": "23229353912582313564",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070846",
+    "name": "闫翼扬",
+    "card": "31057456661237644361",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070847",
+    "name": "杨凤",
+    "card": "03042481060247821246",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070848",
+    "name": "杨皓童",
+    "card": "60528515741675804317",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070849",
+    "name": "杨梦杰",
+    "card": "43574173493687954694",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070850",
+    "name": "杨雨欣",
+    "card": "28129388033947900007",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070851",
+    "name": "杨耘溥",
+    "card": "32129005235738031014",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070852",
+    "name": "叶代顺",
+    "card": "22281623613302742991",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070853",
+    "name": "袁瑞祺",
+    "card": "41047071412612515888",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070854",
+    "name": "曾思婕",
+    "card": "64245600093631208406",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070855",
+    "name": "张城荣",
+    "card": "55228228314157160378",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070856",
+    "name": "张俐",
+    "card": "24113289054498312534",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070857",
+    "name": "张嘹",
+    "card": "62582384152031852907",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070858",
+    "name": "张元馨",
+    "card": "19356606591916545505",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070859",
+    "name": "赵宇瀚",
+    "card": "08152629851656405336",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070860",
+    "name": "郑红梅",
+    "card": "00447153475626520330",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024070861",
+    "name": "周紫慕",
+    "card": "54852080830789713725",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024080631",
+    "name": "徐尉涛",
+    "card": "11538355464682302237",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024120416",
+    "name": "景琦",
+    "card": "64320244422629725581",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024180605",
+    "name": "何佳潞",
+    "card": "36660402382114064946",
+    "claimed": "FALSE"
+  },
+  {
+    "id": "2024180726",
+    "name": "覃湘",
+    "card": "00748203161755856341",
+    "claimed": "FALSE"
+  }
+]
+    ];
+
+    // localStorage key
+    const LS_KEY = 'card_claim_static_v1';
+
+    // load data (prefer localStorage persisted state)
+    function loadData(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(raw){
+          const parsed = JSON.parse(raw);
+          // merge with staticData to allow code updates while preserving claimed flags
+          const map = new Map(parsed.map(item => [item.id + '||' + item.name, item]));
+          return staticData.map(item => map.get(item.id + '||' + item.name) || {...item});
         }
-        
-        // 显示消息
-        function showMessage(text, type) {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = `message ${type}`;
-            messageEl.style.display = 'block';
-            
-            // 5秒后隐藏消息（如果是成功或错误消息）
-            if (type !== 'info') {
-                setTimeout(() => {
-                    messageEl.className = 'message info';
-                    messageEl.textContent = '请先导入卡密数据文件(card.csv)，然后输入学号和姓名获取卡密';
-                }, 5000);
-            }
+      }catch(e){console.warn('读取本地存储失败', e)}
+      return staticData.map(item => ({...item}));
+    }
+
+    function saveData(data){
+      try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(e){ console.warn('保存失败', e); }
+    }
+
+    let data = loadData();
+
+    // UI helpers
+    const tbody = document.getElementById('tableBody');
+    const messageArea = document.getElementById('messageArea');
+    const stats = document.getElementById('stats');
+
+    function renderTable(){
+      tbody.innerHTML = '';
+      data.forEach(row =>{
+        const tr = document.createElement('tr');
+        const tdId = document.createElement('td'); tdId.textContent = row.id; tr.appendChild(tdId);
+        const tdName = document.createElement('td'); tdName.textContent = row.name; tr.appendChild(tdName);
+        const tdCard = document.createElement('td');
+        if(row.claimed){
+          // show full card when claimed
+          tdCard.textContent = row.card;
+        } else {
+          // masked
+          tdCard.innerHTML = `<span class="masked">${maskCard(row.card)}</span>`;
         }
-        
-        // 验证学生身份
-        function verifyStudent() {
-            const studentId = document.getElementById('studentId').value.trim();
-            const studentName = document.getElementById('studentName').value.trim();
-            
-            if (!studentId || !studentName) {
-                showMessage('请输入学号和姓名', 'error');
-                return;
-            }
-            
-            if (cardData.length === 0) {
-                showMessage('请先导入卡密数据', 'error');
-                switchTab('admin');
-                return;
-            }
-            
-            // 查找匹配的学生
-            const student = cardData.find(item => 
-                item.studentId === studentId && item.name === studentName
-            );
-            
-            if (student) {
-                // 显示卡密
-                document.getElementById('cardCode').textContent = student.code;
-                document.getElementById('cardResult').style.display = 'block';
-                showMessage('验证成功！', 'success');
-                
-                // 标记为已使用（在实际应用中可能需要更复杂的逻辑）
-                if (!student.used) {
-                    student.used = true;
-                    student.usedTime = new Date().toLocaleString();
-                    saveData();
-                    updateAdminTable();
-                    updateStats();
-                }
-            } else {
-                showMessage('学号与姓名不匹配，请重新输入', 'error');
-            }
-        }
-        
-        // 处理文件上传
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const csvData = parseCSV(e.target.result);
-                    if (csvData.length > 0 && csvData[0].length >= 3) {
-                        // 转换CSV数据为对象数组
-                        cardData = csvData.map((row, index) => {
-                            // 跳过标题行（如果有）
-                            if (index === 0 && isHeaderRow(row)) {
-                                return null;
-                            }
-                            return {
-                                id: index + 1,
-                                studentId: row[0].trim(),
-                                name: row[1].trim(),
-                                code: row[2].trim(),
-                                used: false,
-                                usedTime: ''
-                            };
-                        }).filter(item => item !== null);
-                        
-                        saveData();
-                        updateAdminTable();
-                        updateStats();
-                        showMessage(`成功导入 ${cardData.length} 条卡密数据`, 'success');
-                    } else {
-                        showMessage('CSV文件格式不正确，请确保包含学号、姓名和卡密三列', 'error');
-                    }
-                } catch (error) {
-                    showMessage('解析CSV文件时出错: ' + error.message, 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-        
-        // 解析CSV内容
-        function parseCSV(csvText) {
-            const lines = csvText.split(/\r\n|\n/);
-            const result = [];
-            
-            for (let i = 0; i < lines.length; i++) {
-                if (lines[i].trim() === '') continue;
-                
-                // 简单的CSV解析，处理带引号的字段
-                const line = [];
-                let inQuotes = false;
-                let currentField = '';
-                
-                for (let j = 0; j < lines[i].length; j++) {
-                    const char = lines[i][j];
-                    
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        line.push(currentField);
-                        currentField = '';
-                    } else {
-                        currentField += char;
-                    }
-                }
-                
-                line.push(currentField);
-                result.push(line);
-            }
-            
-            return result;
-        }
-        
-        // 检查是否为标题行
-        function isHeaderRow(row) {
-            const headerKeywords = ['学号', '姓名', '卡密', 'student', 'name', 'code', 'card'];
-            return row.some(cell => headerKeywords.includes(cell.toLowerCase().trim()));
-        }
-        
-        // 更新管理表格
-        function updateAdminTable() {
-            const tableBody = document.getElementById('cardTable');
-            tableBody.innerHTML = '';
-            
-            if (cardData.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="5" style="text-align: center;">暂无数据，请先导入CSV文件</td>`;
-                tableBody.appendChild(row);
-                return;
-            }
-            
-            cardData.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.studentId}</td>
-                    <td>${item.name}</td>
-                    <td>${item.code}</td>
-                    <td><span class="status ${item.used ? 'status-used' : 'status-unused'}">${item.used ? '已使用' : '未使用'}</span></td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-        
-        // 更新统计信息
-        function updateStats() {
-            const total = cardData.length;
-            const unused = cardData.filter(item => !item.used).length;
-            const used = total - unused;
-            
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('unusedCount').textContent = unused;
-            document.getElementById('usedCount').textContent = used;
-        }
-        
-        // 导出为CSV
-        function exportCards() {
-            if (cardData.length === 0) {
-                showMessage('没有数据可导出', 'error');
-                return;
-            }
-            
-            let csvContent = "学号,姓名,卡密,状态,使用时间\n";
-            
-            cardData.forEach(item => {
-                csvContent += `${item.studentId},${item.name},${item.code},${item.used ? '已使用' : '未使用'},${item.usedTime}\n`;
-            });
-            
-            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "学生卡密列表.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showMessage('数据已导出', 'success');
-        }
-        
-        // 清除所有数据
-        function clearAllData() {
-            if (confirm('确定要清除所有数据吗？这将删除所有卡密信息！')) {
-                cardData = [];
-                localStorage.removeItem('cardData');
-                updateAdminTable();
-                updateStats();
-                showMessage('已清除所有数据', 'success');
-            }
-        }
-        
-        // 保存数据到本地存储
-        function saveData() {
-            localStorage.setItem('cardData', JSON.stringify(cardData));
-        }
-    </script>
+        tr.appendChild(tdCard);
+        const tdStatus = document.createElement('td'); tdStatus.textContent = row.claimed ? '已领取' : '未领取'; tdStatus.className = 'claim-status'; tr.appendChild(tdStatus);
+        tbody.appendChild(tr);
+      });
+
+      const remaining = data.filter(r=>!r.claimed).length;
+      stats.textContent = `总条目：${data.length}，未领取：${remaining}。`;
+    }
+
+    function maskCard(card){
+      // 简单掩码：显示前3和后3，其余替换为*
+      if(!card) return '';
+      if(card.length <= 6) return '***';
+      const pre = card.slice(0,3);
+      const suf = card.slice(-3);
+      return pre + '***' + suf;
+    }
+
+    // handle claim
+    document.getElementById('claimBtn').addEventListener('click', ()=>{
+      const id = document.getElementById('stuId').value.trim();
+      const name = document.getElementById('stuName').value.trim();
+      clearMessage();
+      if(!id || !name){ showMessage('请填写学号与姓名。', 'error'); return; }
+
+      // find exact match by id and name (case-sensitive for name)
+      const idx = data.findIndex(r=> r.id === id && r.name === name);
+      if(idx === -1){ showMessage('未找到匹配记录，请检查学号或姓名是否正确。', 'error'); return; }
+
+      const row = data[idx];
+      if(row.claimed){ showMessage(`此条目已被领取，领取卡密： ${row.card}`, 'success'); renderTable(); return; }
+
+      // mark claimed and persist
+      row.claimed = true;
+      saveData(data);
+      showMessage(`领取成功！您的卡密：${row.card}`,'success');
+      renderTable();
+    });
+
+    // reset claimed states (useful for demo/testing)
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(!confirm('确认要重置所有已领取状态吗？此操作只会影响当前浏览器的本地存储。')) return;
+      data = staticData.map(item => ({...item, claimed:false}));
+      saveData(data);
+      renderTable();
+      showMessage('已重置所有领取状态（仅本地）。','success');
+    });
+
+    function showMessage(text, type){
+      messageArea.innerHTML = '';
+      const div = document.createElement('div'); div.className = 'msg '+(type==='success'?'success':'error'); div.textContent = text; messageArea.appendChild(div);
+    }
+    function clearMessage(){ messageArea.innerHTML=''; }
+
+    // initial render
+    renderTable();
+
+    // accessibility: allow Enter to submit in inputs
+    document.getElementById('stuName').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('claimBtn').click(); });
+
+    // notes: This is a static, client-side-only implementation.
+    // - 数据存储在源码中的 staticData 数组，若要修改初始表请编辑此文件。
+    // - 用户领取后，claimed 标记会保存到浏览器 localStorage（LS_KEY），不同浏览器/设备互不影响。
+    // - 若需要服务端存储或防止伪造，请将该逻辑迁移到服务器端并使用身份验证。
+  </script>
 </body>
 </html>
