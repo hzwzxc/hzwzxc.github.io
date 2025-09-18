@@ -98,11 +98,15 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            width: 100%;
             transition: background 0.3s;
+            display: inline-block;
+            text-align: center;
         }
         .btn:hover {
             background: #2980b9;
+        }
+        .btn-full {
+            width: 100%;
         }
         .card {
             background: #f8f9fa;
@@ -133,7 +137,6 @@
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
-            display: none;
         }
         .error {
             background: #ffebee;
@@ -144,6 +147,11 @@
             background: #e8f5e9;
             color: #2e7d32;
             border-left: 5px solid #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 5px solid #1565c0;
         }
         .admin-panel {
             background: #f8f9fa;
@@ -191,6 +199,7 @@
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
         .btn-secondary {
             background: #7f8c8d;
@@ -204,6 +213,24 @@
         .btn-success:hover {
             background: #27ae60;
         }
+        .file-upload {
+            display: none;
+        }
+        .file-upload-label {
+            display: inline-block;
+            padding: 14px 25px;
+            background: #9b59b6;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-align: center;
+        }
+        .file-upload-label:hover {
+            background: #8e44ad;
+        }
         .footer {
             text-align: center;
             margin-top: 30px;
@@ -212,12 +239,32 @@
             padding: 20px;
             border-top: 1px solid #eee;
         }
+        .instructions {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ffc107;
+        }
+        .instructions h3 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
         @media (max-width: 768px) {
             .tabs {
                 flex-direction: column;
             }
             .action-buttons {
                 flex-direction: column;
+            }
+            .btn, .file-upload-label {
+                width: 100%;
             }
         }
     </style>
@@ -235,7 +282,9 @@
                 <div class="tab" onclick="switchTab('admin')">管理面板</div>
             </div>
             
-            <div id="message" class="message"></div>
+            <div id="message" class="message info">
+                请先导入卡密数据文件(card.csv)，然后输入学号和姓名获取卡密
+            </div>
             
             <div id="studentTab" class="tab-content active">
                 <div class="form-group">
@@ -248,7 +297,7 @@
                     <input type="text" id="studentName" placeholder="请输入您的姓名">
                 </div>
                 
-                <button class="btn" onclick="verifyStudent()">验证身份</button>
+                <button class="btn btn-full" onclick="verifyStudent()">验证身份</button>
                 
                 <div id="cardResult" class="card" style="display: none;">
                     <div class="card-title">您的卡密</div>
@@ -261,10 +310,22 @@
                 <div class="admin-panel">
                     <div class="admin-title">卡密管理</div>
                     
+                    <div class="instructions">
+                        <h3>使用说明</h3>
+                        <ol>
+                            <li>准备CSV文件，格式为：学号,姓名,卡密 (例如: 2024001,张三,ABCD-EFGH-IJKL-MNOP)</li>
+                            <li>点击"选择CSV文件"按钮上传文件</li>
+                            <li>上传成功后数据将自动加载</li>
+                            <li>学生可以在"学生领取"标签页中输入学号和姓名获取卡密</li>
+                        </ol>
+                    </div>
+                    
+                    <input type="file" id="fileUpload" class="file-upload" accept=".csv">
+                    <label for="fileUpload" class="file-upload-label">选择CSV文件</label>
+                    
                     <div class="action-buttons">
-                        <button class="btn btn-success" onclick="generateCards()">生成卡密</button>
-                        <button class="btn btn-secondary" onclick="exportCards()">导出数据</button>
-                        <button class="btn" onclick="resetAll()">重置所有</button>
+                        <button class="btn btn-success" onclick="exportCards()">导出数据</button>
+                        <button class="btn btn-secondary" onclick="clearAllData()">清除所有数据</button>
                     </div>
                     
                     <table>
@@ -294,14 +355,14 @@
         // 初始化卡密数据
         let cardData = JSON.parse(localStorage.getItem('cardData')) || [];
         
-        // 如果本地存储中没有数据，则生成初始数据
-        if (cardData.length === 0) {
-            generateCardData();
-        }
-        
-        // 更新表格和统计信息
-        updateAdminTable();
-        updateStats();
+        // 页面加载时更新表格和统计信息
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAdminTable();
+            updateStats();
+            
+            // 文件上传事件
+            document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
+        });
         
         // 切换标签页
         function switchTab(tabName) {
@@ -324,10 +385,13 @@
             messageEl.className = `message ${type}`;
             messageEl.style.display = 'block';
             
-            // 5秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 5000);
+            // 5秒后隐藏消息（如果是成功或错误消息）
+            if (type !== 'info') {
+                setTimeout(() => {
+                    messageEl.className = 'message info';
+                    messageEl.textContent = '请先导入卡密数据文件(card.csv)，然后输入学号和姓名获取卡密';
+                }, 5000);
+            }
         }
         
         // 验证学生身份
@@ -340,21 +404,25 @@
                 return;
             }
             
+            if (cardData.length === 0) {
+                showMessage('请先导入卡密数据', 'error');
+                switchTab('admin');
+                return;
+            }
+            
             // 查找匹配的学生
             const student = cardData.find(item => 
                 item.studentId === studentId && item.name === studentName
             );
             
             if (student) {
-                if (student.used) {
-                    showMessage('该卡密已被使用', 'error');
-                } else {
-                    // 显示卡密
-                    document.getElementById('cardCode').textContent = student.code;
-                    document.getElementById('cardResult').style.display = 'block';
-                    showMessage('验证成功！', 'success');
-                    
-                    // 标记为已使用（在实际应用中可能需要更复杂的逻辑）
+                // 显示卡密
+                document.getElementById('cardCode').textContent = student.code;
+                document.getElementById('cardResult').style.display = 'block';
+                showMessage('验证成功！', 'success');
+                
+                // 标记为已使用（在实际应用中可能需要更复杂的逻辑）
+                if (!student.used) {
                     student.used = true;
                     student.usedTime = new Date().toLocaleString();
                     saveData();
@@ -366,38 +434,96 @@
             }
         }
         
-        // 生成卡密数据
-        function generateCardData() {
-            cardData = [];
-            for (let i = 1; i <= 66; i++) {
-                cardData.push({
-                    id: i,
-                    studentId: '2024' + String(i).padStart(3, '0'),
-                    name: '学生' + i,
-                    code: generateCardCode(),
-                    used: false,
-                    usedTime: ''
-                });
-            }
-            saveData();
-            showMessage('已成功生成66个卡密', 'success');
+        // 处理文件上传
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvData = parseCSV(e.target.result);
+                    if (csvData.length > 0 && csvData[0].length >= 3) {
+                        // 转换CSV数据为对象数组
+                        cardData = csvData.map((row, index) => {
+                            // 跳过标题行（如果有）
+                            if (index === 0 && isHeaderRow(row)) {
+                                return null;
+                            }
+                            return {
+                                id: index + 1,
+                                studentId: row[0].trim(),
+                                name: row[1].trim(),
+                                code: row[2].trim(),
+                                used: false,
+                                usedTime: ''
+                            };
+                        }).filter(item => item !== null);
+                        
+                        saveData();
+                        updateAdminTable();
+                        updateStats();
+                        showMessage(`成功导入 ${cardData.length} 条卡密数据`, 'success');
+                    } else {
+                        showMessage('CSV文件格式不正确，请确保包含学号、姓名和卡密三列', 'error');
+                    }
+                } catch (error) {
+                    showMessage('解析CSV文件时出错: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
         }
         
-        // 生成随机卡密（16位）
-        function generateCardCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            for (let i = 0; i < 16; i++) {
-                if (i > 0 && i % 4 === 0) result += '-';
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
+        // 解析CSV内容
+        function parseCSV(csvText) {
+            const lines = csvText.split(/\r\n|\n/);
+            const result = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                // 简单的CSV解析，处理带引号的字段
+                const line = [];
+                let inQuotes = false;
+                let currentField = '';
+                
+                for (let j = 0; j < lines[i].length; j++) {
+                    const char = lines[i][j];
+                    
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        line.push(currentField);
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+                
+                line.push(currentField);
+                result.push(line);
             }
+            
             return result;
+        }
+        
+        // 检查是否为标题行
+        function isHeaderRow(row) {
+            const headerKeywords = ['学号', '姓名', '卡密', 'student', 'name', 'code', 'card'];
+            return row.some(cell => headerKeywords.includes(cell.toLowerCase().trim()));
         }
         
         // 更新管理表格
         function updateAdminTable() {
             const tableBody = document.getElementById('cardTable');
             tableBody.innerHTML = '';
+            
+            if (cardData.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="5" style="text-align: center;">暂无数据，请先导入CSV文件</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
             
             cardData.forEach(item => {
                 const row = document.createElement('tr');
@@ -425,10 +551,15 @@
         
         // 导出为CSV
         function exportCards() {
-            let csvContent = "序号,学号,姓名,卡密,状态,使用时间\n";
+            if (cardData.length === 0) {
+                showMessage('没有数据可导出', 'error');
+                return;
+            }
+            
+            let csvContent = "学号,姓名,卡密,状态,使用时间\n";
             
             cardData.forEach(item => {
-                csvContent += `${item.id},${item.studentId},${item.name},${item.code},${item.used ? '已使用' : '未使用'},${item.usedTime}\n`;
+                csvContent += `${item.studentId},${item.name},${item.code},${item.used ? '已使用' : '未使用'},${item.usedTime}\n`;
             });
             
             const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
@@ -442,26 +573,14 @@
             showMessage('数据已导出', 'success');
         }
         
-        // 重置所有数据
-        function resetAll() {
-            if (confirm('确定要重置所有数据吗？这将清除所有卡密使用状态！')) {
-                cardData.forEach(item => {
-                    item.used = false;
-                    item.usedTime = '';
-                });
-                saveData();
+        // 清除所有数据
+        function clearAllData() {
+            if (confirm('确定要清除所有数据吗？这将删除所有卡密信息！')) {
+                cardData = [];
+                localStorage.removeItem('cardData');
                 updateAdminTable();
                 updateStats();
-                showMessage('已重置所有数据', 'success');
-            }
-        }
-        
-        // 生成新卡密
-        function generateCards() {
-            if (confirm('确定要生成新的卡密吗？这将覆盖现有数据！')) {
-                generateCardData();
-                updateAdminTable();
-                updateStats();
+                showMessage('已清除所有数据', 'success');
             }
         }
         
