@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生卡密领取系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        .content {
+            padding: 30px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+        }
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .btn {
+            padding: 14px 25px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+            border-left: 5px solid #2ecc71;
+        }
+        .card-title {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .card-code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            letter-spacing: 2px;
+            font-family: monospace;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 5px solid #c62828;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 5px solid #2e7d32;
+        }
+        .admin-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .admin-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 22px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            font-size: 0.8em;
+        }
+        .status-unused {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-used {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-secondary {
+            background: #7f8c8d;
+        }
+        .btn-secondary:hover {
+            background: #636e72;
+        }
+        .btn-success {
+            background: #2ecc71;
+        }
+        .btn-success:hover {
+            background: #27ae60;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>学生卡密领取系统</h1>
+            <div class="subtitle">请输入学号和姓名验证身份后获取卡密</div>
+        </div>
+        
+        <div class="content">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('student')">学生领取</div>
+                <div class="tab" onclick="switchTab('admin')">管理面板</div>
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div id="studentTab" class="tab-content active">
+                <div class="form-group">
+                    <label for="studentId">学号</label>
+                    <input type="text" id="studentId" placeholder="请输入您的学号">
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentName">姓名</label>
+                    <input type="text" id="studentName" placeholder="请输入您的姓名">
+                </div>
+                
+                <button class="btn" onclick="verifyStudent()">验证身份</button>
+                
+                <div id="cardResult" class="card" style="display: none;">
+                    <div class="card-title">您的卡密</div>
+                    <div id="cardCode" class="card-code"></div>
+                    <p>请妥善保管此卡密，勿泄露给他人</p>
+                </div>
+            </div>
+            
+            <div id="adminTab" class="tab-content">
+                <div class="admin-panel">
+                    <div class="admin-title">卡密管理</div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="generateCards()">生成卡密</button>
+                        <button class="btn btn-secondary" onclick="exportCards()">导出数据</button>
+                        <button class="btn" onclick="resetAll()">重置所有</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>学号</th>
+                                <th>姓名</th>
+                                <th>卡密</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cardTable">
+                            <!-- 卡密数据将在这里动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 卡密发放系统 | 共 <span id="totalCount">0</span> 个卡密 | 未使用: <span id="unusedCount">0</span> | 已使用: <span id="usedCount">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        // 初始化卡密数据
+        let cardData = JSON.parse(localStorage.getItem('cardData')) || [];
+        
+        // 如果本地存储中没有数据，则生成初始数据
+        if (cardData.length === 0) {
+            generateCardData();
+        }
+        
+        // 更新表格和统计信息
+        updateAdminTable();
+        updateStats();
+        
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'student') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('studentTab').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('adminTab').classList.add('active');
+            }
+        }
+        
+        // 显示消息
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            // 5秒后隐藏消息
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 验证学生身份
+        function verifyStudent() {
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            
+            if (!studentId || !studentName) {
+                showMessage('请输入学号和姓名', 'error');
+                return;
+            }
+            
+            // 查找匹配的学生
+            const student = cardData.find(item => 
+                item.studentId === studentId && item.name === studentName
+            );
+            
+            if (student) {
+                if (student.used) {
+                    showMessage('该卡密已被使用', 'error');
+                } else {
+                    // 显示卡密
+                    document.getElementById('cardCode').textContent = student.code;
+                    document.getElementById('cardResult').style.display = 'block';
+                    showMessage('验证成功！', 'success');
+                    
+                    // 标记为已使用（在实际应用中可能需要更复杂的逻辑）
+                    student.used = true;
+                    student.usedTime = new Date().toLocaleString();
+                    saveData();
+                    updateAdminTable();
+                    updateStats();
+                }
+            } else {
+                showMessage('学号与姓名不匹配，请重新输入', 'error');
+            }
+        }
+        
+        // 生成卡密数据
+        function generateCardData() {
+            cardData = [];
+            for (let i = 1; i <= 66; i++) {
+                cardData.push({
+                    id: i,
+                    studentId: '2024' + String(i).padStart(3, '0'),
+                    name: '学生' + i,
+                    code: generateCardCode(),
+                    used: false,
+                    usedTime: ''
+                });
+            }
+            saveData();
+            showMessage('已成功生成66个卡密', 'success');
+        }
+        
+        // 生成随机卡密（16位）
+        function generateCardCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 16; i++) {
+                if (i > 0 && i % 4 === 0) result += '-';
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        // 更新管理表格
+        function updateAdminTable() {
+            const tableBody = document.getElementById('cardTable');
+            tableBody.innerHTML = '';
+            
+            cardData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.studentId}</td>
+                    <td>${item.name}</td>
+                    <td>${item.code}</td>
+                    <td><span class="status ${item.used ? 'status-used' : 'status-unused'}">${item.used ? '已使用' : '未使用'}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            const total = cardData.length;
+            const unused = cardData.filter(item => !item.used).length;
+            const used = total - unused;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('unusedCount').textContent = unused;
+            document.getElementById('usedCount').textContent = used;
+        }
+        
+        // 导出为CSV
+        function exportCards() {
+            let csvContent = "序号,学号,姓名,卡密,状态,使用时间\n";
+            
+            cardData.forEach(item => {
+                csvContent += `${item.id},${item.studentId},${item.name},${item.code},${item.used ? '已使用' : '未使用'},${item.usedTime}\n`;
+            });
+            
+            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "学生卡密列表.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('数据已导出', 'success');
+        }
+        
+        // 重置所有数据
+        function resetAll() {
+            if (confirm('确定要重置所有数据吗？这将清除所有卡密使用状态！')) {
+                cardData.forEach(item => {
+                    item.used = false;
+                    item.usedTime = '';
+                });
+                saveData();
+                updateAdminTable();
+                updateStats();
+                showMessage('已重置所有数据', 'success');
+            }
+        }
+        
+        // 生成新卡密
+        function generateCards() {
+            if (confirm('确定要生成新的卡密吗？这将覆盖现有数据！')) {
+                generateCardData();
+                updateAdminTable();
+                updateStats();
+            }
+        }
+        
+        // 保存数据到本地存储
+        function saveData() {
+            localStorage.setItem('cardData', JSON.stringify(cardData));
+        }
+    </script>
+</body>
+</html>
